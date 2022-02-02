@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import springboot.api.bankapp.data.models.Role;
 import springboot.api.bankapp.data.repository.RoleRepository;
+import springboot.api.bankapp.exceptions.RoleNotFoundException;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -20,8 +21,8 @@ public class RoleService {
     public List<Role> getRoles() { return roleRepository.findAll(); }
 
     //Return a customer by their role id
-    public Role getRole(Long roleId) {
-        return roleRepository.findById(roleId).orElseThrow(() -> new IllegalStateException("Customer with ID: " + roleId + " does not exist."));
+    public Role getRole(Long roleId) throws RoleNotFoundException {
+        return roleRepository.findById(roleId).orElseThrow(() -> new RoleNotFoundException("Customer with ID: " + roleId + " does not exist."));
     }
 
     //Create a new customer
@@ -29,25 +30,19 @@ public class RoleService {
 
     //Update a customer
     @Transactional
-    public Role updateRole(Long roleId, String name) {
-        Role updateRole = roleRepository.findById(roleId).orElseThrow(() -> new IllegalStateException("Customer with ID: " + roleId + " does not exist."));
+    public Role updateRole(Long roleId, String name) throws RoleNotFoundException{
+        Role updatedRole = roleRepository.findById(roleId).orElseThrow(() -> new RoleNotFoundException("Customer with ID: " + roleId + " does not exist."));
 
         if(name != null) {
-            updateRole.setName(name);
+            updatedRole.setName(name);
         }
-        return roleRepository.save(updateRole);
+        return roleRepository.save(updatedRole);
     }
 
     //Delete a customer
-    public boolean deleteRole(Long roleId) {
-        roleRepository.findById(roleId).orElseThrow(() -> new IllegalStateException("Customer with ID: " + roleId + " does not exist."));
-
-        try{
-            roleRepository.deleteById(roleId);
-        } catch (Exception exception) {
-            System.out.println("Error: " + exception);
-            return false;
-        }
+    public boolean deleteRole(Long roleId) throws RoleNotFoundException{
+        roleRepository.findById(roleId).orElseThrow(() -> new RoleNotFoundException("Customer with ID: " + roleId + " does not exist."));
+        roleRepository.deleteById(roleId);
         return true;
     }
 }

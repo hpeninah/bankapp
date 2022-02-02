@@ -3,6 +3,7 @@ package springboot.api.bankapp.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import springboot.api.bankapp.data.models.Customer;
+import springboot.api.bankapp.exceptions.CustomerNotFoundException;
 import springboot.api.bankapp.service.CustomerService;
 
 import java.util.List;
@@ -24,37 +25,20 @@ public class CustomerController {
     }
 
     @GetMapping("/{customerId}")
-    public Customer getCustomerById(@PathVariable("customerId") Long customerId) {
-        try {
-            return customerService.getCustomer(customerId);
-        } catch(IllegalStateException exception) {
-            System.out.println(exception.getMessage());
-            return null;
-        }
+    public Customer getCustomerById(@PathVariable("customerId") Long customerId) throws CustomerNotFoundException {
+        return customerService.getCustomer(customerId);
     }
 
     @PostMapping("")
     public Customer createCustomer(@RequestBody Customer customer) { return customerService.createCustomer(customer); }
 
     @PutMapping("/{accountId}")
-    public Customer updateCustomer(@PathVariable("customerId") Long customerId, Customer customer) {
-        try {
-            Customer updatedCustomer = customerService.updateCustomer(customerId, customer);
-            return updatedCustomer;
-        } catch (IllegalStateException exception) {
-            System.out.println(exception.getMessage());
-            return null;
-        }
+    public Customer updateCustomer(@PathVariable("customerId") Long customerId, Customer customer) throws CustomerNotFoundException{
+        return customerService.updateCustomer(customerId, customer);
     }
 
     @DeleteMapping("/{customerId}")
-    public boolean deleteCustomer(@PathVariable("customerId") Long customerId) {
-        try {
-            customerService.deleteCustomer(customerId);
-            return true;
-        } catch(IllegalStateException exception) {
-            System.out.println(exception.getMessage());
-            return false;
-        }
+    public boolean deleteCustomer(@PathVariable("customerId") Long customerId) throws CustomerNotFoundException{
+        return customerService.deleteCustomer(customerId);
     }
 }

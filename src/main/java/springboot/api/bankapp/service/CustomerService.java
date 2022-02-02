@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import springboot.api.bankapp.data.models.Customer;
 import springboot.api.bankapp.data.repository.CustomerRepository;
+import springboot.api.bankapp.exceptions.CustomerNotFoundException;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -24,34 +25,31 @@ public class CustomerService {
     }
 
     //Return customer by id
-    public Customer getCustomer(Long customerId){
-        return customerRepository.findById(customerId).orElseThrow(() -> new IllegalStateException("Customer with ID: " + customerId + " does not exist."));
+    public Customer getCustomer(Long customerId) throws CustomerNotFoundException {
+        return customerRepository.findById(customerId).orElseThrow(() -> new CustomerNotFoundException("Customer with ID: " + customerId + " does not exist."));
     }
     //Create a new customer
     public Customer createCustomer(Customer customer) { return customerRepository.save(customer); }
 
     //Update a customer
     @Transactional
-    public Customer updateCustomer(Long customerId, Customer customer) {
-        Customer updatedCustomer = customerRepository.findById(customerId).orElseThrow(() -> new IllegalStateException("Customer with ID: " + customerId + " does not exist."));
+    public Customer updateCustomer(Long customerId, Customer customer) throws CustomerNotFoundException{
+        Customer updatedCustomer = customerRepository.findById(customerId).orElseThrow(() -> new CustomerNotFoundException("Customer with ID: " + customerId + " does not exist."));
 
         if(customer.getName() != null) {
             updatedCustomer.setName(customer.getName());
+        }
+
+        if(customer.getEmail() != null) {
+            updatedCustomer.setEmail(customer.getEmail());
         }
         return customerRepository.save(updatedCustomer);
     }
 
     //Delete a customer
-    public boolean deleteCustomer(Long customerId) {
-        customerRepository.findById(customerId).orElseThrow(() -> new IllegalStateException("Customer with ID: " + customerId + " does not exist."));
-
-        try{
-            customerRepository.deleteById(customerId);
-        } catch(Exception exception) {
-            System.out.println("Error: " + exception);
-            return false;
-        }
-
+    public boolean deleteCustomer(Long customerId) throws CustomerNotFoundException{
+        customerRepository.findById(customerId).orElseThrow(() -> new CustomerNotFoundException("Customer with ID: " + customerId + " does not exist."));
+        customerRepository.deleteById(customerId);
         return true;
     }
 }

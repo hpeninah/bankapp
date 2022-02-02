@@ -7,6 +7,10 @@ import springboot.api.bankapp.data.models.User;
 import springboot.api.bankapp.data.repository.CustomerRepository;
 import springboot.api.bankapp.data.repository.RoleRepository;
 import springboot.api.bankapp.data.repository.UserRepository;
+import springboot.api.bankapp.exceptions.InvalidInputException;
+import springboot.api.bankapp.exceptions.InvalidLoginException;
+import springboot.api.bankapp.exceptions.MissingFieldException;
+import springboot.api.bankapp.exceptions.UserNotFoundException;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -31,46 +35,47 @@ public class UserService {
     }
 
     //Return a user by id
-    public User getUser(Long userId) {
-        return userRepository.findById(Math.toIntExact(userId)).orElseThrow(() -> new IllegalStateException("User with ID: " + userId + " does not exist."));
+    public User getUser(Long userId) throws UserNotFoundException {
+        return userRepository.findById(Math.toIntExact(userId)).orElseThrow(() -> new UserNotFoundException("User with ID: " + userId + " does not exist."));
     }
 
     //Create a new user
-    public User createUser(User user){
+    public User createUser(User user) throws UserNotFoundException{
         customerRepository.save(user.getCustomer());
-        Role role = roleRepository.findById(user.getRole().getRoleId()).orElseThrow(() -> new IllegalStateException("Role ID: " + user.getRole().getRoleId() + " does not exist."));
+        Role role = roleRepository.findById(user.getRole().getRoleId()).orElseThrow(() -> new UserNotFoundException("Role ID: " + user.getRole().getRoleId() + " does not exist."));
         user.setRole(role);
         return userRepository.save(user);
     }
 
     //Login a user
-    public User loginUser(User user) {
-        return userRepository.loginUser(user.getUsername(), user.getPassword());
+    public User loginUser(User user) throws InvalidLoginException {
+        User verifyUser = userRepository.loginUser(user.getUsername(), user.getPassword());
+
+        if(verifyUser == null) {
+            throw new InvalidLoginException("Invalid username and password");
+        }
+        return verifyUser;
     }
 
     //Update a user
     @Transactional
-    public User updateUser(Long userId, String password) {
-        User updateUser = userRepository.findById(Math.toIntExact(userId)).orElseThrow(() -> new IllegalStateException("User ID: " + userId + " does not exist."));
+    public User updateUser(Long userId, String password) throws UserNotFoundException, MissingFieldException, InvalidInputException {
+        User updateUser = userRepository.findById(Math.toIntExact(userId)).orElseThrow(() -> new UserNotFoundException("User ID: " + userId + " does not exist."));
 
-        if(password != null) {
-            updateUser.setPassword(password);
-            return userRepository.save(updateUser);
-        } else {
-            throw new IllegalStateException("Password is required.");
+        if (password == null) {
+            throw new MissingFieldException("Password is required.");
+        } else if (password.length() < 8) {
+            throw new InvalidInputException("Password must be greater than 8 characters.");
         }
+
+        updateUser.setPassword(password);
+        return userRepository.save(updateUser);
     }
+
     //Delete a user
-    public boolean deleteUser(Long userId) {
-        userRepository.findById(Math.toIntExact(userId)).orElseThrow(() -> new IllegalStateException("User ID: " + userId + " does not exist."));
-
-        try{
-            userRepository.deleteById((Math.toIntExact(userId)));
-        } catch (Exception exception) {
-            System.out.println("Error: " + exception );
-            return false;
-        }
-
+    public boolean deleteUser(Long userId) throws UserNotFoundException {
+        userRepository.findById(Math.toIntExact(userId)).orElseThrow(() -> new UserNotFoundException("User ID: " + userId + " does not exist."));
+        userRepository.deleteById((Math.toIntExact(userId)));
         return true;
     }
 }

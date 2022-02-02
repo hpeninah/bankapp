@@ -6,6 +6,7 @@ import springboot.api.bankapp.data.models.Account;
 import springboot.api.bankapp.data.models.Customer;
 import springboot.api.bankapp.data.repository.AccountRepository;
 import springboot.api.bankapp.data.repository.CustomerRepository;
+import springboot.api.bankapp.exceptions.AccountNotFoundException;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -27,8 +28,8 @@ public class AccountService {
     }
 
     //Get single account
-    public Account getAccount(Long accountId) {
-        return  accountRepository.findById(accountId).orElseThrow(() -> new IllegalStateException("Account ID: " + accountId + " does not exist."));
+    public Account getAccount(Long accountId) throws AccountNotFoundException {
+        return  accountRepository.findById(accountId).orElseThrow(() -> new AccountNotFoundException("Account ID: " + accountId + " does not exist."));
     }
 
     //Get an account by the customer
@@ -37,33 +38,23 @@ public class AccountService {
     }
 
     //Create an account
-    public Account createAccount(Account account) {
-        Customer customer = customerRepository.findById(account.getCustomer().getCustomerId()).orElseThrow(() -> new IllegalStateException("Not allowed."));
+    public Account createAccount(Account account) throws AccountNotFoundException{
+        Customer customer = customerRepository.findById(account.getCustomer().getCustomerId()).orElseThrow(() -> new AccountNotFoundException("Not allowed."));
         account.setCustomer(customer);
         return accountRepository.save(account);
     }
 
     //Update an account
     @Transactional
-    public Account updateAccount(Long accountId, Account account) {
-        Account updatedAccount = accountRepository.findById(accountId).orElseThrow(() ->  new IllegalStateException("Customer with ID: " + accountId + "does not exist."));
-
-        if(account.getCurrentBal() > 0) {
-            updatedAccount.setCurrentBal(account.getCurrentBal());
-        }
+    public Account updateAccount(Long accountId, Account account) throws AccountNotFoundException{
+        Account updatedAccount = accountRepository.findById(accountId).orElseThrow(() ->  new AccountNotFoundException("Customer with ID: " + accountId + "does not exist."));
         return accountRepository.save(updatedAccount);
     }
 
     //Delete an account
-    public boolean deleteAccount(Long accountId) {
-        accountRepository.findById(accountId).orElseThrow(() -> new IllegalStateException("Account ID: " + accountId + " does not exist."));
-
-        try{
-            accountRepository.deleteById(accountId);
-        } catch(Exception exception) {
-            System.out.println("Error: " + exception);
-            return false;
-        }
+    public boolean deleteAccount(Long accountId) throws AccountNotFoundException{
+        accountRepository.findById(accountId).orElseThrow(() -> new AccountNotFoundException("Account ID: " + accountId + " does not exist."));
+        accountRepository.deleteById(accountId);
         return true;
     }
 }

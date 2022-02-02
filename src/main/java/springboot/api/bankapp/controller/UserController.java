@@ -1,10 +1,12 @@
 package springboot.api.bankapp.controller;
 
 import org.springframework.beans.factory.annotation.*;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springboot.api.bankapp.data.models.User;
+import springboot.api.bankapp.exceptions.InvalidInputException;
+import springboot.api.bankapp.exceptions.InvalidLoginException;
+import springboot.api.bankapp.exceptions.MissingFieldException;
+import springboot.api.bankapp.exceptions.UserNotFoundException;
 import springboot.api.bankapp.service.UserService;
 
 import java.util.List;
@@ -22,44 +24,32 @@ public class UserController {
     }
 
     @GetMapping("")
-    public ResponseEntity<List<User>> getUsers () {
-        return new ResponseEntity<List<User>>(userService.getUsers(), HttpStatus.OK);
+    public List<User> getUsers () {
+        return userService.getUsers();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long userId){
-        return new ResponseEntity<User>(userService.getUser(userId), HttpStatus.OK);
+    public User getUserById(@PathVariable Long userId) throws UserNotFoundException {
+        return userService.getUser(userId);
     }
 
     @PostMapping("")
-    public ResponseEntity<User> addUser(@RequestBody User user) {
-        return new ResponseEntity<User>(userService.createUser(user), HttpStatus.CREATED);
+    public User addUser(@RequestBody User user) throws UserNotFoundException{
+        return userService.createUser(user);
     }
 
     @PostMapping("/login")
-    public User loginUser(@RequestBody User user) {
+    public User loginUser(@RequestBody User user) throws InvalidLoginException{
         return userService.loginUser(user);
     }
 
     @PutMapping("/{userId}/{newPs}")
-    public ResponseEntity<User> updateUser(@PathVariable("userId") Long userId, @PathVariable("newPs") String newPs) {
-        try {
-            User updateUser = userService.updateUser(userId, newPs);
-            return new ResponseEntity<User>(updateUser, HttpStatus.OK);
-        } catch(IllegalStateException exception) {
-            System.out.println(exception.getMessage());
-            return null;
-        }
+    public User updateUser(@PathVariable("userId") Long userId, @PathVariable("newPs") String newPs) throws UserNotFoundException, InvalidInputException, MissingFieldException {
+        return userService.updateUser(userId, newPs);
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<?> deleteUser(@PathVariable("userId") Long userId) {
-        try {
-            userService.deleteUser(userId);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch(IllegalStateException exception) {
-            System.out.println(exception.getMessage());
-            return null;
-        }
+    public boolean deleteUser(@PathVariable("userId") Long userId) throws UserNotFoundException{
+        return userService.deleteUser(userId);
     }
 }

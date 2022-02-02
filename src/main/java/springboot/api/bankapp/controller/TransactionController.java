@@ -3,6 +3,8 @@ package springboot.api.bankapp.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import springboot.api.bankapp.data.models.Transaction;
+import springboot.api.bankapp.exceptions.InvalidInputException;
+import springboot.api.bankapp.exceptions.TransactionNotFoundException;
 import springboot.api.bankapp.service.TransactionService;
 
 import java.util.List;
@@ -24,13 +26,8 @@ public class TransactionController {
     }
 
     @GetMapping("/{transactionId}")
-    public Transaction getTransactionById(@PathVariable("transactionId") Long transactionId) {
-        try{
-            return transactionService.getTransaction(transactionId);
-        } catch(IllegalStateException exception) {
-            System.out.println(exception.getMessage());
-            return null;
-        }
+    public Transaction getTransactionById(@PathVariable("transactionId") Long transactionId) throws TransactionNotFoundException {
+        return transactionService.getTransaction(transactionId);
     }
 
     @GetMapping("/account/{accountId}")
@@ -39,18 +36,12 @@ public class TransactionController {
     }
 
     @PostMapping("")
-    public Transaction createTransaction(@RequestBody Transaction transaction) {
+    public Transaction createTransaction(@RequestBody Transaction transaction) throws TransactionNotFoundException, InvalidInputException {
         return transactionService.createTransaction(transaction);
     }
 
     @DeleteMapping("/{transactionId}")
-    public boolean deleteTransaction(@PathVariable("transactionId") Long transactionId) {
-        try {
-            transactionService.deleteTransaction(transactionId);
-            return true;
-        } catch(IllegalStateException exception) {
-            System.out.println(exception.getMessage());
-            return false;
-        }
+    public boolean deleteTransaction(@PathVariable("transactionId") Long transactionId) throws TransactionNotFoundException{
+        return transactionService.deleteTransaction(transactionId);
     }
 }

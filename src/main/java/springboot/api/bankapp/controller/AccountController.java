@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.method.P;
 import org.springframework.web.bind.annotation.*;
 import springboot.api.bankapp.data.models.Account;
+import springboot.api.bankapp.exceptions.AccountNotFoundException;
 import springboot.api.bankapp.service.AccountService;
 
 import java.util.List;
@@ -26,13 +27,8 @@ public class AccountController {
     }
 
     @GetMapping("/{accountId}")
-    public Account getAccountById(@PathVariable("accountId") Long accountId) {
-        try{
-            return accountService.getAccount(accountId);
-        } catch(IllegalStateException exception) {
-            System.out.println(exception.getMessage());
-            return null;
-        }
+    public Account getAccountById(@PathVariable("accountId") Long accountId) throws AccountNotFoundException {
+        return accountService.getAccount(accountId);
     }
 
     @GetMapping("/customer/{customerId}")
@@ -41,27 +37,15 @@ public class AccountController {
     }
 
     @PostMapping("")
-    public Account createAccount(@RequestBody Account account) { return accountService.createAccount(account); }
+    public Account createAccount(@RequestBody Account account) throws AccountNotFoundException { return accountService.createAccount(account); }
 
     @PutMapping("/{accountId}")
-    public Account updateAccount(@PathVariable("accountId") Long accountId, Account account){
-        try{
-            Account updatedAccount = accountService.updateAccount(accountId, account);
-            return updatedAccount;
-        } catch(IllegalStateException exception) {
-            System.out.println(exception.getMessage());
-            return null;
-        }
+    public Account updateAccount(@PathVariable("accountId") Long accountId, Account account) throws AccountNotFoundException{
+        return accountService.updateAccount(accountId, account);
     }
 
     @DeleteMapping("/{accountId}")
-    public boolean deleteAccount(@PathVariable("accountId") Long accountId ) {
-        try {
-            accountService.deleteAccount(accountId);
-            return true;
-        } catch (IllegalStateException exception) {
-            System.out.println(exception.getMessage());
-            return false;
-        }
+    public boolean deleteAccount(@PathVariable("accountId") Long accountId ) throws AccountNotFoundException {
+        return accountService.deleteAccount(accountId);
     }
 }

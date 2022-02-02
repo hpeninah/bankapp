@@ -6,6 +6,8 @@ import springboot.api.bankapp.data.models.Account;
 import springboot.api.bankapp.data.models.Transaction;
 import springboot.api.bankapp.data.repository.AccountRepository;
 import springboot.api.bankapp.data.repository.TransactionRepository;
+import springboot.api.bankapp.exceptions.InvalidInputException;
+import springboot.api.bankapp.exceptions.TransactionNotFoundException;
 
 import java.util.List;
 
@@ -26,8 +28,8 @@ public class TransactionService {
     }
 
     //Get single transaction
-    public Transaction getTransaction(Long transactionId) {
-        return transactionRepository.findById(transactionId).orElseThrow(() -> new IllegalStateException("Transaction ID: " + transactionId + " does not exist."));
+    public Transaction getTransaction(Long transactionId) throws TransactionNotFoundException {
+        return transactionRepository.findById(transactionId).orElseThrow(() -> new TransactionNotFoundException("Transaction ID: " + transactionId + " does not exist."));
     }
 
     //Get transactions by the account
@@ -36,24 +38,30 @@ public class TransactionService {
     }
 
     //Create a transaction
-    public Transaction createTransaction(Transaction transaction) {
-        Account account = accountRepository.findById(transaction.getAccount().getAccountId()).orElseThrow(() -> new IllegalStateException("Fail"));
-        transaction.setAccount(account);
+    public Transaction createTransaction(Transaction transaction) throws TransactionNotFoundException, InvalidInputException {
+        Account account = accountRepository.findById(transaction.getAccount().getAccountId()).orElseThrow(() -> new TransactionNotFoundException("Account ID: " + transaction.getAccount().getAccountId() + " does not exist."));
 
+        double accountBal = account.getCurrentBal();
+        double transactionBal = transaction.getCurrentBal();
+
+        if(transaction.getTransactionType().equals("Deposit")){
+            account.setCurrentBal(accountBal + transactionBal);
+        } else if ((transaction.getTransactionType().equals("Withdraw") && accountBal > transactionBal) ||
+                (transaction.getTransactionType().equals("Transfer") && accountBal > transactionBal)) {
+            account.setCurrentBal(accountBal - transactionBal);
+        } else {
+            throw new InvalidInputException("Invalid transaction type: " + transaction.getTransactionType());
+        }
+
+        accountRepository.save(account);
+        transaction.setAccount(account);
         return transactionRepository.save(transaction);
     }
 
     //Delete a transaction
-    public boolean deleteTransaction(Long transactionID) {
-        transactionRepository.findById(transactionID).orElseThrow(() -> new IllegalStateException("Transaction ID: " + transactionID + " does not exist."));
-
-        try {
-            transactionRepository.deleteById(transactionID);
-        } catch(Exception exception) {
-            System.out.println("Error: " + exception);
-            return false;
-        }
-
+    public boolean deleteTransaction(Long transactionID) throws TransactionNotFoundException{
+        transactionRepository.findById(transactionID).orElseThrow(() -> new TransactionNotFoundException("Transaction ID: " + transactionID + " does not exist."));
+        transactionRepository.deleteById(transactionID);
         return true;
     }
 }
