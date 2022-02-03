@@ -9,8 +9,8 @@ import springboot.api.bankapp.service.CustomerService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/controller")
-@CrossOrigin
+@RequestMapping("/customer")
+@CrossOrigin("*")
 public class CustomerController {
     private final CustomerService customerService;
 

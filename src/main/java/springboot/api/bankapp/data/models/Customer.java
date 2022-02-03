@@ -14,7 +14,7 @@ public class Customer {
     String uniqueId;
     String name;
     String email;
-    Date dob;
+    String dob;
 
     @OneToOne(mappedBy = "customer")
     private User user;
@@ -24,7 +24,7 @@ public class Customer {
 
     public Customer(){};
 
-    public Customer(Long customerId, Long pan, String uniqueId, String name, String email, Date dob) {
+    public Customer(Long customerId, Long pan, String uniqueId, String name, String email, String dob) {
         this.customerId = customerId;
         this.pan = pan;
         this.uniqueId = uniqueId;
@@ -33,7 +33,7 @@ public class Customer {
         this.dob = dob;
     }
 
-    public Customer(Long pan, String uniqueId, String name, String email, Date dob){
+    public Customer(Long pan, String uniqueId, String name, String email, String dob){
         this.pan = pan;
         this.uniqueId = uniqueId;
         this.name = name;
@@ -67,9 +67,9 @@ public class Customer {
 
     public void setEmail(String email){ this.email = email; }
 
-    public Date getDob(){ return dob; }
+    public String getDob(){ return dob; }
 
-    public void setDob(Date dob) {
+    public void setDob(String dob) {
         this.dob = dob;
     }
 }

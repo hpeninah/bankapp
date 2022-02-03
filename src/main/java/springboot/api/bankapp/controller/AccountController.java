@@ -1,7 +1,6 @@
 package springboot.api.bankapp.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.method.P;
 import org.springframework.web.bind.annotation.*;
 import springboot.api.bankapp.data.models.Account;
 import springboot.api.bankapp.exceptions.AccountNotFoundException;
@@ -11,7 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/accounts")
-@CrossOrigin
+@CrossOrigin("*")
 public class AccountController {
 
     private final AccountService accountService;

@@ -10,7 +10,7 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.AUTO)
     Long transactionId;
     Long transactionRef;
-    Date transactionDate;
+    String transactionDate;
     String transactionType;
     String transactionSubType;
     Double currentBal;
@@ -21,7 +21,7 @@ public class Transaction {
 
     public Transaction(){}
 
-    public Transaction(Long transactionId, Long transactionRef, Date transactionDate, String transactionType, String transactionSubType, Double currentBal, Account account) {
+    public Transaction(Long transactionId, Long transactionRef, String transactionDate, String transactionType, String transactionSubType, Double currentBal, Account account) {
         this.transactionId = transactionId;
         this.transactionRef = transactionRef;
         this.transactionDate = transactionDate;
@@ -31,7 +31,7 @@ public class Transaction {
         this.account = account;
     }
 
-    public Transaction(Long transactionRef, Date transactionDate, String transactionType, String transactionSubType, Double currentBal, Account account){
+    public Transaction(Long transactionRef, String transactionDate, String transactionType, String transactionSubType, Double currentBal, Account account){
         this.transactionRef = transactionRef;
         this.transactionDate = transactionDate;
         this.transactionType = transactionType;
@@ -56,11 +56,11 @@ public class Transaction {
         this.transactionRef = transactionRef;
     }
 
-    public Date getTransactionDate() {
+    public String getTransactionDate() {
         return transactionDate;
     }
 
-    public void setTransactionDate(Date transactionDate) {
+    public void setTransactionDate(String transactionDate) {
         this.transactionDate = transactionDate;
     }
 
